@@ -70,4 +70,167 @@
      ![image](https://user-images.githubusercontent.com/42695637/189666224-a819cf1e-641a-4aa5-9de2-e13f50db71bf.png)
 
   
--  
+  7. Now, check the status of jenkins service using ```sudo systemctl status jenkins```.
+  
+#### Step-2: Setting Up Jenkins
+
+- To set up your installation, visit Jenkins on its default port, 8080, using your server domain name or IP address: ```http://your_server_ip_or_domain:8080```
+
+  You should receive the Unlock Jenkins screen, which displays the location of the initial password:
+
+![image](https://user-images.githubusercontent.com/42695637/190149938-d9a9b447-312b-40a3-bc1a-efdbdf0534c0.png)
+
+- In the terminal window, use the cat command to display the password:
+
+  ```sudo cat /var/lib/jenkins/secrets/initialAdminPassword```
+  
+  Copy the 32-character alphanumeric password from the terminal and paste it into the Administrator password field, then click Continue.
+
+- The next screen presents the option of installing suggested plugins or selecting specific plugins:
+
+![image](https://user-images.githubusercontent.com/42695637/190150451-8d2339d0-be7b-43af-b367-b575ff553058.png)
+
+  We’ll click the Install suggested plugins option if we want otherwise cancel the same and add plugins according to requirement like ssh for     
+  authentication of manage nodes, which will immediately begin the installation process.
+  
+- When the installation is complete, you’ll be prompted to set up the first administrative user. It’s possible to skip this step and continue as admin       using the initial password we used above, but we’ll take a moment to create the user.  
+ 
+  ![image](https://user-images.githubusercontent.com/42695637/190151358-a53f1c80-08f3-4a52-9a0f-4ffbfe44bbe8.png)
+
+- Enter the name and password for your user and save and continue 
+  
+- After confirming the appropriate information, click Save and Finish. You’ll receive a confirmation page confirming that “Jenkins is Ready!”
+ 
+- Now, click on start using jenkins.
+
+- Now, we have to install SSH plugin for connectivity between master node and slave node with SSH.
+
+- We have to click on manage node in jenkin and click on new node
+
+  ![image](https://user-images.githubusercontent.com/42695637/190152554-c2312226-aeda-4bdf-93c4-1898ec3354c7.png)
+
+- Give the name and choose permanent agent. After that click on create  
+  ![image](https://user-images.githubusercontent.com/42695637/190152816-06c01ff1-ab32-4bed-b44d-296c520936d8.png)
+  
+- Now fill the details like below:
+
+  ![image](https://user-images.githubusercontent.com/42695637/190153218-6f29a9b2-cb14-48fa-829a-c67de10d3819.png)
+
+  ![image](https://user-images.githubusercontent.com/42695637/190153446-436fb833-84b3-45a8-8549-3135dc7e7e70.png)
+  
+  ![image](https://user-images.githubusercontent.com/42695637/190153590-e5d84952-4f02-4f15-963a-e6d7c7096b49.png)
+
+  ![image](https://user-images.githubusercontent.com/42695637/190153739-d4ee1a4b-9ddf-4720-9e29-13c67af9e744.png)
+
+  Note:- For the credentials which we have seen ubuntu user we got after the other server creation. Once created we can add the credenntials in below path   in jenkins
+  
+   ![image](https://user-images.githubusercontent.com/42695637/190154370-f67ffab2-723f-4ae4-8d66-4f0a3d78170e.png)
+   
+- Now click on New Item for creating the Job and choose Pipeline and click on ok and choose GitHub hook trigger for GITScm polling for GitHub Plugin   triggers a one-time polling on GITScm. When GITScm polls GitHub, it finds that there is a change and initiates a build. 
+
+  ![image](https://user-images.githubusercontent.com/42695637/190156166-9508073a-9273-4042-a783-736409337957.png)
+  
+- We have to give below option, Pipeline script from SCM and choose the file from github with the name Jenkinsfile
+
+  ![image](https://user-images.githubusercontent.com/42695637/190156562-b4de7d4b-dee0-4833-8b3e-df3ea7603444.png)
+
+  ![image](https://user-images.githubusercontent.com/42695637/190156973-c5748947-f003-452b-a6fc-c6a23d04dbf7.png)
+  
+  ![image](https://user-images.githubusercontent.com/42695637/190157131-62848d79-42cd-44dc-99e9-33394f529202.png)
+
+
+#### Step-3: Create the second server for react-Js application
+
+- First we need to update the package list run below command:     
+   
+   ```sudo apt update``` 
+   
+- Install the java on server with below command:    
+   
+  ```apt-get install openjdk-11-jdk```
+
+- After that execute the below commands to install Node and npm
+
+  ``` curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -```
+  ``` sudo apt-get install gcc g++ make ```
+  ```sudo apt-get install -y nodejs ```
+  
+- Now let’s install Nginx webserver
+ 
+  ```sudo apt install -y nginx```
+  
+- After installing the web server, we have to create the root folder to serve our files.
+
+  ```sudo mkdir /var/www/jenkins-react-app```
+ 
+- After completing the above steps, we need to create the configuration file for the Nginx server.
+ 
+- Open a text editor of your choice and create the file /etc/nginx/sites-available/jenkins-react-app and paste the below configs.
+  ![image](https://user-images.githubusercontent.com/42695637/190160967-f6652bd1-42f2-49e6-9838-92303a7a1462.png)
+
+
+- Now we have to create a Symlink to the above configuration in /etc/nginx/sites-enabled
+
+  ``` sudo ln -s /etc/nginx/sites-available/jenkins-react-app /etc/nginx/sites-enabled/jenkins-react-app ```
+  
+- Now start the nginx server
+  
+   sudo service nginx start
+   
+- Now put the jenkinsfile in github which we are mentioned in out Item in jenkins
+  
+  ![image](https://user-images.githubusercontent.com/42695637/190161696-940f8080-0054-472d-a1bf-ae2d120bdad7.png)
+  
+- To automatically trigger our Jenkins job, we have to add a Github webhook to our repository, let’s go ahead and add it.
+
+  Go to the settings of your Github repository and go to the Webhooks section. Enter the payload URL, i.e. by default http://{external_dns_hostname or IP}:{jenkins port}/github-webhook/
+  
+  eg: http://ec2–221–186–93–192.compute-1.amazonaws.com:8080/github-webhook/
+  or http://publicIP:8080/github-webhook/
+  
+  ![image](https://user-images.githubusercontent.com/42695637/190162318-1d726f6a-ca52-47cd-b1dc-de08bc782cc2.png)
+
+
+- Put the SSH credentials for connectivity node in credentials managers and put the same on connectivity with manage node like below
+
+  ![image](https://user-images.githubusercontent.com/42695637/190162752-7da5c6a4-95d4-4674-b170-d1dfd5d8f0fb.png)
+
+
+- Now one both nodes are sync as below and after that click on build for manually run. 
+
+  ![image](https://user-images.githubusercontent.com/42695637/190163053-c5147739-141b-470e-8bcf-98e0fe24a2b7.png)
+
+- Once it done after that we need to purchase domain and update A record related to react js server.
+
+
+
+#### Step-4: Install letsencrypt certbot SSL on website 
+
+- The first step to using Let’s Encrypt to obtain an SSL certificate is to install the Certbot software on your server.
+
+  Install Certbot and it’s Nginx plugin with apt:  
+  
+  ``` sudo apt install certbot python3-certbot-nginx ```
+  
+- After that run below command for installing SSL 
+
+  ``` sudo certbot --nginx -d example.com -d www.example.com ``` 
+  
+- It will modified the nginx configuration according to SSL. Below are the new conf file for nginx related to website
+   
+ ![image](https://user-images.githubusercontent.com/42695637/190164646-3929eb2e-042d-4bb2-99c9-75bcf40cc47f.png)
+
+ ![image](https://user-images.githubusercontent.com/42695637/190164760-b5de0fea-b077-4db8-8613-1d5c910f5863.png)
+
+
+    
+ 
+  
+
+
+
+  
+
+
+
+  
