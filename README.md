@@ -221,6 +221,88 @@
  ![image](https://user-images.githubusercontent.com/42695637/190164646-3929eb2e-042d-4bb2-99c9-75bcf40cc47f.png)
 
  ![image](https://user-images.githubusercontent.com/42695637/190164760-b5de0fea-b077-4db8-8613-1d5c910f5863.png)
+ 
+ 
+#### Step-5: Run the Reactjs with Docker now 
+
+- Create the docker file as like below for running the reactJS with the name docker file
+
+  FROM node:16.13.0 AS build
+
+  # Create and set the working directory on the container
+  # then copy over the package.json and package-lock.json
+    WORKDIR /frontend
+    COPY package*.json ./
+
+  # Install the node packages before copying the files
+    RUN npm install
+
+
+    COPY . .
+
+  # build your app
+    RUN npm run build
+
+  # production environment
+    FROM nginx:1.17.4-alpine
+    COPY --from=build /frontend/build /usr/share/nginx/html
+    RUN rm /etc/nginx/conf.d/default.conf
+  # change the left path with yours, below the file content
+    COPY --from=build /frontend/nginx.conf /etc/nginx/conf.d
+    EXPOSE 80
+    CMD ["nginx", "-g", "daemon off;"]
+    
+ -  Now create nginx file in same directory where the docker file is present and also you have files of reactjs on same directory
+ 
+    server {
+
+             listen 80;
+
+             location / {
+               root   /usr/share/nginx/html;
+               index  index.html index.htm;
+               try_files $uri $uri/ /index.html;
+             }
+
+            error_page   500 502 503 504  /50x.html;
+
+            location = /50x.html {
+            root   /usr/share/nginx/html;
+           }
+
+   }
+   
+   ![image](https://user-images.githubusercontent.com/42695637/190319921-345aa841-4e4f-4ab0-9246-9a7994caacdf.png)
+   
+-  Now run the command for build the image from dockerfile
+  
+   ```docker build -t reactjs:latest .```
+             or
+   ```docker build -t imagename:tag .```
+   
+- After that run the container with below command from that image:
+
+  ``` docker container run -d -p 80:80 --name reactapp reactjs:latest```
+                       or
+  ``` docker container run -d -p 80:80 --name containername createdimagename```
+  
+  
+- Now push the image in dockerhub so that everyone will get it.
+
+  First login into dockerhub with below command and enter the credentials after that we can push the image in dockerhub
+  
+  ```docker login```
+  
+  Before push we need to rename the tag according to our account
+  
+  docker tag reactjs mak1993/reactjs
+  
+  For push the image in dockerhub run below command:
+  
+  ```docker push mak1993/reactjs:latest``` 
+
+    
+    
 
 
     
