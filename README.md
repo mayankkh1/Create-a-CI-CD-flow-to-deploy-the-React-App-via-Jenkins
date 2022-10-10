@@ -231,12 +231,14 @@
 
 - Create and set the working directory on the containerthen copy over the package.json and package-lock.json
     
- ```WORKDIR /frontend```
- ```COPY package*.json ./```
+  ```WORKDIR /frontend```
+ 
+  ```COPY package*.json ./```
 
 - Install the node packages before copying the files
     
   ```RUN npm install```
+  
   ```COPY . .```
 
  - Build your app
@@ -246,13 +248,18 @@
  - Production environment
  
    ```FROM nginx:1.17.4-alpine```
+  
    ```COPY --from=build /frontend/build /usr/share/nginx/html```
+   
    ```RUN rm /etc/nginx/conf.d/default.conf```
   
  - Change the left path with yours, below the file content
     
+   
    ```COPY --from=build /frontend/nginx.conf /etc/nginx/conf.d```
+   
    ```EXPOSE 80```
+   
    ```CMD ["nginx", "-g", "daemon off;"]```
     
  -  Now create nginx file in same directory where the docker file is present and also you have files of reactjs on same directory
